@@ -7,8 +7,11 @@ public class ClientePj extends Cliente {
 	private String razaoSocial;
 	private String nomeFantasia;
 
-	public ClientePj(String numeroConta, String agencia, String telefone, float saldo, float limiteChequeEspecial, TipoConta tipoConta) {
-		super(numeroConta, agencia, telefone, saldo, limiteChequeEspecial, tipoConta);
+	public ClientePj() {
+
+	}
+	public ClientePj(String numeroConta, String agencia, String telefone, float saldo, float limiteChequeEspecial, TipoConta tipoConta, String  senha) {
+		super(numeroConta, agencia, telefone, saldo, limiteChequeEspecial, tipoConta, senha);
 	}
 
 	/*public ClientePj(String numeroConta, int agencia, int telefone, double saldo, double limiteChequeEspecial,

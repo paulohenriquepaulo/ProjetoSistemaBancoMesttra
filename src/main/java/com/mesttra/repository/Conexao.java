@@ -32,14 +32,15 @@ public abstract class Conexao {
             Class.forName(driver);
             connection = DriverManager.getConnection(servidor, usuario, senha);
             statement = connection.createStatement();
-            System.out.println("conectado...");
         } catch (Exception e) {
             System.out.println("ERRO: " + e.getMessage());
         }
     }
 
     public static ResultSet executarConsulta(String consulta) {
-        conectar();
+        if (!estaConectado()) {
+            conectar();
+        }
         try {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(consulta);
@@ -53,7 +54,9 @@ public abstract class Conexao {
     }
 
     public static boolean executarDML(String dml) {
-        conectar();
+        if (!estaConectado()) {
+            conectar();
+        }
         boolean ok = false;
         try {
             statement = connection.createStatement();
@@ -66,6 +69,10 @@ public abstract class Conexao {
         return ok;
     }
 
-
-
+    public static boolean estaConectado() {
+        if (connection != null) {
+            return true;
+        }
+        return false;
+    }
 }

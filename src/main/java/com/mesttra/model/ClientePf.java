@@ -7,8 +7,8 @@ public class ClientePf extends Cliente {
 	private int idade;
 	
 	public ClientePf(String numeroConta, String agencia, String telefone, Float saldo, Float limiteChequeEspecial,
-			String cpf, String nome, int idade, TipoConta tipoConta) {
-		super(numeroConta, agencia, telefone, saldo, limiteChequeEspecial, tipoConta);
+			String cpf, String nome, int idade, TipoConta tipoConta, String senha) {
+		super(numeroConta, agencia, telefone, saldo, limiteChequeEspecial, tipoConta, senha);
 		
 		this.cpf = cpf;
 		this.nome = nome;

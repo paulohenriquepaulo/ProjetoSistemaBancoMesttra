@@ -1,27 +1,30 @@
 package com.mesttra.service;
 
 
-
+import com.mesttra.model.Cliente;
 import com.mesttra.model.ClientePf;
 import com.mesttra.model.ClientePj;
-import com.mesttra.repository.ClientePJRepository;
+import com.mesttra.model.TipoConta;
+import com.mesttra.repository.ClienteRepository;
+import com.mesttra.repository.Conexao;
 
 public class GerenteService {
 
 
-	private ClientePJRepository clientePJRepository = new ClientePJRepository();
-	
-	public GerenteService() {
-		
-	}
+    private static ClienteRepository repository = new ClienteRepository();
+
+    public GerenteService() {
+
+    }
 
 
+    public void cadastraClientePf(ClientePf c) {
+        repository.save(c);
+    }
 
-
-	
-	public void cadastraClientePf(ClientePf c) {
-		clientePJRepository.save(c);
-	}
+    public void cadastraClientePj(ClientePj c) {
+        repository.save(c);
+    }
 	
 
 	
@@ -29,36 +32,40 @@ public class GerenteService {
 		this.clientesPf[i] = null;
 	}*/
 
-	public static void buscarClientePf() {
-		ClientePf c = (ClientePf) MenuService.buscarCliente();
-		System.out.println("Nome: "+ c.getNome());
-		System.out.println("CPF: "+c.getCpf());
-		System.out.println("Idade: "+c.getIdade());
-		System.out.println("Agencia: "+c.getAgencia());
-		System.out.println("Cheque especial: "+c.getLimiteChequeEspecial());
-		System.out.println("Numero da conta: "+c.getNumeroConta());
-		System.out.println("Saldo: "+c.getSaldo());
-		System.out.println("Telefone: "+c.getTelefone());
-		System.out.println("Tipo conta: "+c.getTipoConta());
+    public static void buscarClientePf() {
+        ClientePf c = (ClientePf) MenuService.buscarCliente();
+        try {
+            System.out.println("Nome: " + c.getNome());
+            System.out.println("CPF: " + c.getCpf());
+            System.out.println("Idade: " + c.getIdade());
+            System.out.println("Agencia: " + c.getAgencia());
+            System.out.println("Cheque especial: " + c.getLimiteChequeEspecial());
+            System.out.println("Numero da conta: " + c.getNumeroConta());
+            System.out.println("Saldo: " + c.getSaldo());
+            System.out.println("Telefone: " + c.getTelefone());
+            System.out.println("Tipo conta: " + c.getTipoConta());
+        } catch (NullPointerException e) {
+            System.out.println("Cliente não encontrado");
+        }
 
-	}
+    }
 
-	public void buscarClientePj(ClientePj p) {
-		
-		System.out.println("Agencia: "+p.getAgencia());
-		System.out.println("Cnpj: "+p.getCnpj());
-		System.out.println("Cheque especial: "+p.getLimiteChequeEspecial());
-		System.out.println("Nome fantasia: "+p.getNomeFantasia());
-		System.out.println("Numero da conta: "+p.getNumeroConta());
-		System.out.println("Razão social: "+p.getRazaoSocial());
-		System.out.println("Saldo: "+p.getSaldo());
-		System.out.println("Telefone: "+p.getTelefone());
-		System.out.print("Sócios: ");
-		for (int c = 0; c < p.getNomeSocios().length; c++) {
-			System.out.print(p.getNomeSocios()[c]+" | ");
-		}
-		
-	}
+    public void buscarClientePj(ClientePj p) {
+
+        System.out.println("Agencia: " + p.getAgencia());
+        System.out.println("Cnpj: " + p.getCnpj());
+        System.out.println("Cheque especial: " + p.getLimiteChequeEspecial());
+        System.out.println("Nome fantasia: " + p.getNomeFantasia());
+        System.out.println("Numero da conta: " + p.getNumeroConta());
+        System.out.println("Razão social: " + p.getRazaoSocial());
+        System.out.println("Saldo: " + p.getSaldo());
+        System.out.println("Telefone: " + p.getTelefone());
+        System.out.print("Sócios: ");
+        for (int c = 0; c < p.getNomeSocios().length; c++) {
+            System.out.print(p.getNomeSocios()[c] + " | ");
+        }
+
+    }
 
 	/*public void aumentarLimitePj(int i, Double val) {
 		Double chequeEspecial = this.clientesPj[i].getLimiteChequeEspecial();
@@ -84,20 +91,30 @@ public class GerenteService {
 		this.clientesPf[i].setLimiteChequeEspecial(chequeEspecial);
 	}*/
 
-/*	public void transferir(String origin, String destino, Double valTransf) {
-		Cliente clinteOrigin = recuperarCliente(origin);
-		Cliente clienteDestino = recuperarCliente(destino);
-		
-		if (clinteOrigin.getSaldo() >= valTransf ) {
-			clinteOrigin.setSaldo(clinteOrigin.getSaldo() - valTransf);
-			clienteDestino.setSaldo(clienteDestino.getSaldo() + valTransf);
-			salvar(clinteOrigin, clienteDestino);
-			System.out.println("Valor transferido com sucesso!");
-		}
-		else {
-			System.out.println("Saldo insuficiente!");
-		}
-	}*/
+    public static void transferir(Cliente origin, Cliente destino, Float valTransf) {
+
+
+        if (origin.getSaldo() >= valTransf) {
+            origin.setSaldo(origin.getSaldo() - valTransf);
+            destino.setSaldo(destino.getSaldo() + valTransf);
+
+            if (origin.getTipoConta().equals(TipoConta.PF)) {
+                alterarSaldoPf(origin.getId(), origin.getSaldo());
+            } else {
+                alterarSaldoPj(origin.getId(), origin.getSaldo());
+            }
+
+            if (destino.getTipoConta().equals(TipoConta.PF)) {
+                alterarSaldoPf(destino.getId(), destino.getSaldo());
+            } else {
+                alterarSaldoPj(destino.getId(), destino.getSaldo());
+            }
+
+            System.out.println("Valor transferido com sucesso!");
+        } else {
+            System.out.println("Saldo insuficiente!");
+        }
+    }
 	
 /*	public Cliente recuperarCliente(String numeroConta) {
         for (int i = 0; i < 50; i++) {
@@ -111,27 +128,16 @@ public class GerenteService {
         }
         return null;
     }*/
-	
-	/*private void salvar(Cliente origin, Cliente destino) {
-		if (origin.getTipoConta().equals(TipoConta.PJ)) {
-			int i = Helpers.varrerPorNumeroConta(this.clientesPj, origin.getNumeroConta());
-			this.clientesPj[i] = origin;
-		}
-		else {
-			int i = Helpers.varrerPorNumeroConta(this.clientesPf, origin.getNumeroConta());
-			this.clientesPf[i] = origin;
-		}
 
-		if (destino.getTipoConta().equals(TipoConta.PJ)) {
-			int i = Helpers.varrerPorNumeroConta(this.clientesPj, destino.getNumeroConta());
-			this.clientesPj[i] = destino;
-		}
-		else {
-			int i = Helpers.varrerPorNumeroConta(this.clientesPf, destino.getNumeroConta());
-			this.clientesPf[i] = destino;
-		}
-		
-	}*/
+    private static void alterarSaldoPj(Integer id, Float saldo) {
+        String update = "update clientepj set saldo = " + saldo + " where id = " + id + ";";
+        Conexao.executarDML(update);
+    }
+
+    private static void alterarSaldoPf(Integer id, Float saldo) {
+        String update = "update clientepf set saldo = " + saldo + " where id = " + id + ";";
+        Conexao.executarDML(update);
+    }
 	
 	/*public void addSaldo(String numeroConta, Double val) {
 		Cliente cliente = recuperarCliente(numeroConta);
@@ -163,5 +169,5 @@ public class GerenteService {
 		}
 		
 	}*/
-	
+
 }

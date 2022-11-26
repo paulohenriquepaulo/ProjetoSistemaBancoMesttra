@@ -2,6 +2,7 @@ package com.mesttra.model;
 
 public abstract class Cliente {
 
+	private Integer id;
 	private String numeroConta;
 	private String agencia;
 	private String telefone;
@@ -9,13 +10,16 @@ public abstract class Cliente {
 	private float limiteChequeEspecial;
 	private TipoConta tipoConta;
 
-	public Cliente(String numeroConta, String agencia, String telefone, float saldo, float limiteChequeEspecial, TipoConta tipoConta) {
+	private String senha;
+
+	public Cliente(String numeroConta, String agencia, String telefone, float saldo, float limiteChequeEspecial, TipoConta tipoConta, String senha) {
 		this.numeroConta = numeroConta;
 		this.agencia = agencia;
 		this.telefone = telefone;
 		this.saldo = saldo;
 		this.limiteChequeEspecial = limiteChequeEspecial;
 		this.tipoConta = tipoConta;
+		this.senha = senha;
 	}
 
 	protected Cliente() {
@@ -67,5 +71,21 @@ public abstract class Cliente {
 
 	public void setTipoConta(TipoConta tipoConta) {
 		this.tipoConta = tipoConta;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getSenha() {
+		return senha;
+	}
+
+	public void setSenha(String senha) {
+		this.senha = senha;
 	}
 }
