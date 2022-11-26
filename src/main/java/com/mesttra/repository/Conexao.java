@@ -1,7 +1,5 @@
 package com.mesttra.repository;
 
-import com.mesttra.model.Cliente;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;

@@ -28,11 +28,27 @@ public class MenuService {
     }
 
     public static void menuPrincipal() {
-        System.out.println("====================================================");
-        System.out.println("=============== BANCO 1000Devs =====================");
-        System.out.println("====================================================");
-        System.out.println("1 - Funcionario");
-        System.out.println("2 - Cliente");
+        boolean repetir = true;
+        while (repetir) {
+            System.out.println("====================================================");
+            System.out.println("=============== BANCO 1000Devs =====================");
+            System.out.println("====================================================");
+            System.out.println("1 - Funcionario");
+            System.out.println("2 - Cliente");
+            System.out.println("3 - Sair");
+            int opcao = Integer.parseInt(entrada.nextLine());
+            switch (opcao) {
+                case 1:
+                    painelFuncionario();
+                    break;
+                case 2:
+                    menuCliente();
+                    break;
+                case 3:
+                    repetir = false;
+                    break;
+            }
+        }
     }
 
     public static void menuCliente() {
@@ -42,16 +58,60 @@ public class MenuService {
         System.out.println("====================================================");
         System.out.println("1 - Primerio acesso");
         System.out.println("2 - Fazer login");
+        System.out.println("3 - Sair");
         int opcao = Integer.parseInt(entrada.nextLine());
         if (opcao == 1) {
             primeiroAcesso();
             painelCliente(login());
-        } else {
+        } else if (opcao == 2) {
             Cliente cliente = login();
             if (cliente != null) {
                 painelCliente(cliente);
             } else {
                 System.out.println("Conta Bloqueada");
+            }
+        } else {
+            menuPrincipal();
+        }
+    }
+
+    public static void painelFuncionario() {
+        boolean repetir = true;
+        while (repetir) {
+            System.out.println("====================================================");
+            System.out.println("=============== BANCO 1000Devs =====================");
+            System.out.println("====================================================");
+            System.out.println("1 - Cadastrar Cliente");
+            System.out.println("2 - Excluir Cliente");
+            System.out.println("3 - Buscar Cliente");
+            System.out.println("4 - Sair");
+            switch (Integer.parseInt(entrada.nextLine())) {
+                case 1:
+                    System.out.println("Qual tipo de cliente deseja Cadastrar ? " +
+                            "\n1 - PJ" +
+                            "\n2 - PF");
+                    int tipoCliente = Integer.parseInt(entrada.nextLine());
+                    if (tipoCliente == 2) {
+                        ClientePf pf = (ClientePf) MenuService.dadosCliente(tipoCliente);
+                        clienteRepository.save(pf);
+                        MenuService.dadosCliente(pf);
+                    } else {
+                        ClientePj pj = (ClientePj) MenuService.dadosCliente(tipoCliente);
+                        MenuService.dadosCliente(pj);
+                        clienteRepository.save(pj);
+
+                    }
+                    break;
+                case 2:
+                    MenuService.deletarCliente();
+                    break;
+                case 3:
+                    GerenteService.buscarCliente();
+                    break;
+                case 4:
+                    repetir = false;
+                    break;
+
             }
         }
     }
@@ -64,8 +124,9 @@ public class MenuService {
             System.out.println("====================================================");
             System.out.println("1 - Saldo");
             System.out.println("2 - Transferir");
-            System.out.println("3 - Dados da Conta");
-            System.out.println("4 - Sair");
+            System.out.println("3 - Depositar");
+            System.out.println("4 - Dados da Conta");
+            System.out.println("5 - Sair");
             int opcao = Integer.parseInt(entrada.nextLine());
             switch (opcao) {
                 case 1:
@@ -76,19 +137,33 @@ public class MenuService {
                     float tranferencia = Float.parseFloat(entrada.nextLine());
                     System.out.println("Informe o número da conta de destino: ");
                     String numeroContaDestino = entrada.nextLine();
-
-                    Cliente clienteDestino = clienteRepository.getByClientePf(numeroContaDestino);
-                    if (clienteDestino == null) {
-                        clienteDestino = clienteRepository.getByClientePj(numeroContaDestino);
+                    Cliente clienteDestino = null;
+                    while (true) {
+                        clienteDestino = clienteRepository.getByCliente(numeroContaDestino);
+                        if (clienteDestino == null) {
+                            clienteDestino = clienteRepository.getByCliente(numeroContaDestino);
+                        }
+                        if (clienteDestino != null) {
+                            break;
+                        }
+                        System.out.println("A conta para transferencia está incorreta\n");
+                        System.out.println("Informe o número da conta de destino: ");
+                        numeroContaDestino = entrada.nextLine();
                     }
+
                     GerenteService.transferir(cliente, clienteDestino, tranferencia);
 
                     System.out.println("Saldo " + cliente.getSaldo());
                     break;
                 case 3:
-                    dadosPessoaisPF((ClientePf) cliente);
+                    System.out.print("Informe o valor de deposito: ");
+                    float valorDeposito = Float.parseFloat(entrada.nextLine());
+                    GerenteService.depositar(cliente, valorDeposito);
                     break;
                 case 4:
+                    dadosPessoais(cliente);
+                    break;
+                case 5:
                     repetir = false;
                     break;
             }
@@ -103,37 +178,44 @@ public class MenuService {
             System.out.println("====================================================");
             System.out.print("Informe o número da conta: ");
             String numeroConta = entrada.nextLine();
-            Cliente cliente = clienteRepository.getByClientePf(numeroConta);
+            Cliente cliente = clienteRepository.getByCliente(numeroConta);
             if (cliente == null) {
-                cliente = clienteRepository.getByClientePj(numeroConta);
-            }
-            if (cliente != null) {
-                int tentativa = 3;
-                for (int i = 0; i < 4; i++) {
-                    System.out.print("Informe a senha: ");
-                    String senhaInformada = entrada.nextLine();
+                cliente = clienteRepository.getByCliente(numeroConta);
+            } else if (cliente == null){
+                System.out.println("Número de conta Invalido");
+            } else if (cliente != null) {
+                if (cliente.getSenha() == null) {
+                    System.out.println("Este é seu primeiro acesso\nVocê será redirecionado para cadastrar a sua senha\n");
+                    primeiroAcesso();
+                     return login();
+                } else {
+                    int tentativa = 3;
+                    for (int i = 0; i < 4; i++) {
+                        System.out.print("Informe a senha: ");
+                        String senhaInformada = entrada.nextLine();
+                        if (senhaInformada.equals(cliente.getSenha())) {
+                            return cliente;
+                        } else {
+                            System.out.println("Senha invalida, você tem mais " + tentativa + " Tentativas");
+                            tentativa--;
+                            if (tentativa < 0) {
+                                return null;
+                            }
 
-                    if (senhaInformada.equals(cliente.getSenha())) {
-                        return cliente;
-                    } else {
-                        System.out.println("Senha invalida, você tem mais " + tentativa + " Tentativas");
-                        tentativa--;
-                        if (tentativa < 0) {
-                            return null;
                         }
-
                     }
                 }
-
-            } else {
-                System.out.println("Número de conta Invalido");
             }
+
         }
 
     }
 
     private static void primeiroAcesso() {
         while (true) {
+            System.out.println("====================================================");
+            System.out.println("================= CADASTRAR SENHA ==================");
+            System.out.println("====================================================");
             System.out.print("Informe o número da conta: ");
             String numeroConta = entrada.nextLine();
             if (validarNumeroConta(numeroConta)) {
@@ -143,12 +225,12 @@ public class MenuService {
                     System.out.print("Infome novamente a senha: ");
                     String senha1 = entrada.nextLine();
                     if (senha.equals(senha1)) {
-                        Cliente cliente = clienteRepository.getByClientePf(numeroConta);
+                        Cliente cliente = clienteRepository.getByCliente(numeroConta);
                         if (cliente == null) {
-                            cliente = clienteRepository.getByClientePj(numeroConta);
+                            cliente = clienteRepository.getByCliente(numeroConta);
                         }
                         cliente.setSenha(senha);
-                        alterarSenha(senha, numeroConta);
+                        cadastrarSenha(senha, numeroConta);
                         System.out.println("Senha cadastrada com sucesso");
                         break;
                     } else {
@@ -164,17 +246,17 @@ public class MenuService {
     }
 
     private static Boolean validarNumeroConta(String numeroConta) {
-        if (clienteRepository.getByClientePf(numeroConta) != null || clienteRepository.getByClientePj(numeroConta) != null) {
+        if (clienteRepository.getByCliente(numeroConta) != null || clienteRepository.getByCliente(numeroConta) != null) {
             return true;
         }
         return false;
     }
 
-    private static void alterarSenha(String senha, String numeroConta) {
-        Cliente c = clienteRepository.getByClientePf(numeroConta);
+    private static void cadastrarSenha(String senha, String numeroConta) {
+        Cliente c = clienteRepository.getByCliente(numeroConta);
         String update = null;
         if (c == null) {
-            c = clienteRepository.getByClientePj(numeroConta);
+            c = clienteRepository.getByCliente(numeroConta);
         }
         if (c.getTipoConta().equals(TipoConta.PF)) {
             update = "update clientepf set senha = " + senha + " where id = " + c.getId() + ";";
@@ -243,51 +325,86 @@ public class MenuService {
         return numeracao;
     }
 
-    public static void dadosClientePF(ClientePf cliente) {
-        System.out.println("-----------------------------------------------------");
-        System.out.println("----------------- CLIENTE CADASTRADO ----------------");
-        System.out.println("-----------------------------------------------------");
-        System.out.println("Nome: " + cliente.getNome());
-        System.out.println("Idade: " + cliente.getIdade());
-        System.out.println("Telefone: " + cliente.getTelefone());
-        System.out.println("Número conta: " + cliente.getNumeroConta());
-        System.out.println("Agencia: " + cliente.getAgencia());
-        System.out.println("Limite cheque Especial: " + cliente.getLimiteChequeEspecial());
-        System.out.println("Tipo conta: " + cliente.getTipoConta().toString());
-        System.out.println("Senha: " + cliente.getSenha());
-        System.out.println("Saldo: " + cliente.getSaldo());
+    public static void dadosCliente(Cliente cliente) {
+
+        if (cliente.getTipoConta().equals(TipoConta.PF)) {
+            ClientePf c = (ClientePf) cliente;
+            System.out.println("-----------------------------------------------------");
+            System.out.println("----------------- CLIENTE CADASTRADO ----------------");
+            System.out.println("-----------------------------------------------------");
+            System.out.println("Nome: " + c.getNome());
+            System.out.println("Idade: " + c.getIdade());
+            System.out.println("Telefone: " + c.getTelefone());
+            System.out.println("Número conta: " + c.getNumeroConta());
+            System.out.println("Agencia: " + c.getAgencia());
+            System.out.println("Limite cheque Especial: " + c.getLimiteChequeEspecial());
+            System.out.println("Tipo conta: " + c.getTipoConta().toString());
+            System.out.println("Senha: " + c.getSenha());
+            System.out.println("Saldo: " + c.getSaldo());
+        } else {
+            System.out.println("-----------------------------------------------------");
+            System.out.println("----------------- CLIENTE CADASTRADO ----------------");
+            System.out.println("-----------------------------------------------------");
+            ClientePj pj = (ClientePj) cliente;
+            System.out.println("Nome fantasia: " + pj.getNomeFantasia());
+            System.out.println("Telefone: " + pj.getTelefone());
+            System.out.println("Razão social: " + pj.getRazaoSocial());
+            System.out.println("Agencia: " + pj.getAgencia());
+            System.out.println("Cnpj: " + pj.getCnpj());
+            System.out.println("Cheque especial: " + pj.getLimiteChequeEspecial());
+            System.out.println("Numero da conta: " + pj.getNumeroConta());
+            System.out.println("Saldo: " + pj.getSaldo());
+        }
+
 
     }
 
-    public static void dadosPessoaisPF(ClientePf cliente) {
-        System.out.println("-----------------------------------------------------");
-        System.out.println("------------------ DADOS PESSOAIAS ------------------");
-        System.out.println("-----------------------------------------------------");
-        System.out.println("Nome: " + cliente.getNome());
-        System.out.println("Idade: " + cliente.getIdade());
-        System.out.println("Telefone: " + cliente.getTelefone());
-        System.out.println("Número conta: " + cliente.getNumeroConta());
-        System.out.println("Agencia: " + cliente.getAgencia());
-        System.out.println("Limite cheque Especial: " + cliente.getLimiteChequeEspecial());
-        System.out.println("Tipo conta: " + cliente.getTipoConta().toString());
-        System.out.println("Senha: " + cliente.getSenha());
-        System.out.println("Saldo: " + cliente.getSaldo());
+    public static void dadosPessoais(Cliente c) {
+
+        if (c.getTipoConta().equals(TipoConta.PF)) {
+            ClientePf pf = (ClientePf) c;
+            System.out.println("-----------------------------------------------------");
+            System.out.println("------------------ DADOS PESSOAIAS ------------------");
+            System.out.println("-----------------------------------------------------");
+            System.out.println("Nome: " + pf.getNome());
+            System.out.println("Idade: " + pf.getIdade());
+            System.out.println("Telefone: " + pf.getTelefone());
+            System.out.println("Número conta: " + pf.getNumeroConta());
+            System.out.println("Agencia: " + pf.getAgencia());
+            System.out.println("Limite cheque Especial: " + pf.getLimiteChequeEspecial());
+            System.out.println("Tipo conta: " + pf.getTipoConta().toString());
+            System.out.println("Senha: " + pf.getSenha());
+            System.out.println("Saldo: " + pf.getSaldo());
+        } else {
+            ClientePj pj = (ClientePj) c;
+            System.out.println("-----------------------------------------------------");
+            System.out.println("------------------ DADOS PESSOAIAS ------------------");
+            System.out.println("-----------------------------------------------------");
+            System.out.println("Nome fantasia: " + pj.getNomeFantasia());
+            System.out.println("Telefone: " + pj.getTelefone());
+            System.out.println("Razão social: " + pj.getRazaoSocial());
+            System.out.println("Agencia: " + pj.getAgencia());
+            System.out.println("Cnpj: " + pj.getCnpj());
+            System.out.println("Cheque especial: " + pj.getLimiteChequeEspecial());
+            System.out.println("Numero da conta: " + pj.getNumeroConta());
+            System.out.println("Saldo: " + pj.getSaldo());
+        }
 
     }
 
     public static Cliente buscarCliente() {
-        System.out.println("Número da conta ");
+        System.out.print("Número da conta: ");
         String numeroConta = entrada.nextLine();
-        return clienteRepository.getByClientePf(numeroConta);
+        return clienteRepository.getByCliente(numeroConta);
 
     }
 
 
     public static void deletarCliente() {
         System.out.print("Digite o número da conta que deseja deletar: ");
-        Cliente c = clienteRepository.getByClientePf(entrada.nextLine());
+        Cliente c = clienteRepository.getByCliente(entrada.nextLine());
         try {
-            clienteRepository.deletarCliente(c.getId());
+            clienteRepository.deletarCliente(c.getId(), c.getTipoConta());
         } catch (NullPointerException e) {
             System.out.println("Conta não encontrada.");
         }

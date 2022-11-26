@@ -17,7 +17,6 @@ public class GerenteService {
 
     }
 
-
     public void cadastraClientePf(ClientePf c) {
         repository.save(c);
     }
@@ -25,71 +24,46 @@ public class GerenteService {
     public void cadastraClientePj(ClientePj c) {
         repository.save(c);
     }
-	
 
-	
-/*	public void removerClientePf(int i) {
-		this.clientesPf[i] = null;
-	}*/
 
-    public static void buscarClientePf() {
-        ClientePf c = (ClientePf) MenuService.buscarCliente();
+    public static void buscarCliente() {
+
         try {
-            System.out.println("Nome: " + c.getNome());
-            System.out.println("CPF: " + c.getCpf());
-            System.out.println("Idade: " + c.getIdade());
-            System.out.println("Agencia: " + c.getAgencia());
-            System.out.println("Cheque especial: " + c.getLimiteChequeEspecial());
-            System.out.println("Numero da conta: " + c.getNumeroConta());
-            System.out.println("Saldo: " + c.getSaldo());
-            System.out.println("Telefone: " + c.getTelefone());
-            System.out.println("Tipo conta: " + c.getTipoConta());
+            Cliente cliente = MenuService.buscarCliente();
+            if (cliente.getTipoConta().equals(TipoConta.PF)) {
+                ClientePf pf = (ClientePf) cliente;
+                System.out.println("====================================================");
+                System.out.println("===================== CLIENTE ======================");
+                System.out.println("====================================================");
+                System.out.println("Nome: " + pf.getNome());
+                System.out.println("CPF: " + pf.getCpf());
+                System.out.println("Idade: " + pf.getIdade());
+                System.out.println("Agencia: " + pf.getAgencia());
+                System.out.println("Cheque especial: " + pf.getLimiteChequeEspecial());
+                System.out.println("Numero da conta: " + pf.getNumeroConta());
+                System.out.println("Saldo: " + pf.getSaldo());
+                System.out.println("Telefone: " + pf.getTelefone());
+                System.out.println("Tipo conta: " + pf.getTipoConta());
+            } else {
+                ClientePj pj = (ClientePj) cliente;
+                System.out.println("====================================================");
+                System.out.println("===================== CLIENTE ======================");
+                System.out.println("====================================================");
+                System.out.println("Agencia: " + pj.getAgencia());
+                System.out.println("Cnpj: " + pj.getCnpj());
+                System.out.println("Cheque especial: " + pj.getLimiteChequeEspecial());
+                System.out.println("Nome fantasia: " + pj.getNomeFantasia());
+                System.out.println("Numero da conta: " + pj.getNumeroConta());
+                System.out.println("Razão social: " + pj.getRazaoSocial());
+                System.out.println("Saldo: " + pj.getSaldo());
+                System.out.println("Telefone: " + pj.getTelefone());
+            }
+
         } catch (NullPointerException e) {
             System.out.println("Cliente não encontrado");
         }
-
     }
 
-    public void buscarClientePj(ClientePj p) {
-
-        System.out.println("Agencia: " + p.getAgencia());
-        System.out.println("Cnpj: " + p.getCnpj());
-        System.out.println("Cheque especial: " + p.getLimiteChequeEspecial());
-        System.out.println("Nome fantasia: " + p.getNomeFantasia());
-        System.out.println("Numero da conta: " + p.getNumeroConta());
-        System.out.println("Razão social: " + p.getRazaoSocial());
-        System.out.println("Saldo: " + p.getSaldo());
-        System.out.println("Telefone: " + p.getTelefone());
-        System.out.print("Sócios: ");
-        for (int c = 0; c < p.getNomeSocios().length; c++) {
-            System.out.print(p.getNomeSocios()[c] + " | ");
-        }
-
-    }
-
-	/*public void aumentarLimitePj(int i, Double val) {
-		Double chequeEspecial = this.clientesPj[i].getLimiteChequeEspecial();
-		chequeEspecial += val;
-		this.clientesPj[i].setLimiteChequeEspecial(chequeEspecial);
-	}
-	
-	public void aumentarLimitePf(int i, Double val) {
-		Double chequeEspecial = this.clientesPf[i].getLimiteChequeEspecial();
-		chequeEspecial += val;
-		this.clientesPf[i].setLimiteChequeEspecial(chequeEspecial);
-	}
-	
-	public void diminuirLimitePj(int i, Double val) {
-		Double chequeEspecial = this.clientesPj[i].getLimiteChequeEspecial();
-		chequeEspecial -= val;
-		this.clientesPj[i].setLimiteChequeEspecial(chequeEspecial);
-	}
-	
-	public void diminuirLimitePf(int i, Double val) {
-		Double chequeEspecial = this.clientesPf[i].getLimiteChequeEspecial();
-		chequeEspecial -= val;
-		this.clientesPf[i].setLimiteChequeEspecial(chequeEspecial);
-	}*/
 
     public static void transferir(Cliente origin, Cliente destino, Float valTransf) {
 
@@ -115,19 +89,7 @@ public class GerenteService {
             System.out.println("Saldo insuficiente!");
         }
     }
-	
-/*	public Cliente recuperarCliente(String numeroConta) {
-        for (int i = 0; i < 50; i++) {
-            if (clientesPj[i] != null && clientesPj[i].getNumeroConta().equals(numeroConta)) {
-                return (ClientePj) clientesPj[i];
-            }
-            if (clientesPf[i] != null && clientesPf[i].getNumeroConta().equals(numeroConta)) {
-                return (ClientePf) clientesPf[i];
-            }
 
-        }
-        return null;
-    }*/
 
     private static void alterarSaldoPj(Integer id, Float saldo) {
         String update = "update clientepj set saldo = " + saldo + " where id = " + id + ";";
@@ -138,36 +100,23 @@ public class GerenteService {
         String update = "update clientepf set saldo = " + saldo + " where id = " + id + ";";
         Conexao.executarDML(update);
     }
-	
-	/*public void addSaldo(String numeroConta, Double val) {
-		Cliente cliente = recuperarCliente(numeroConta);
-		cliente.setSaldo(cliente.getSaldo() + val);
-		
-		if (cliente.getTipoConta().equals(TipoConta.PF)) {
-			int i = Helpers.varrerPorNumeroConta(this.clientesPf, numeroConta);
-			this.clientesPf[i] = cliente;
-			
-		}
-		else if (cliente.getTipoConta().equals(TipoConta.PJ)) {
-			int i = Helpers.varrerPorNumeroConta(this.clientesPj, numeroConta);
-			this.clientesPj[i] = cliente;
-		}
-	}*/
 
-	/*public void editar(String numeroConta, int altTelefone) {
-		
-		Cliente c = recuperarCliente(numeroConta);
-		c.setTelefone(altTelefone);
-		
-		if (c.getTipoConta().equals(TipoConta.PF)) {
-			int i = Helpers.varrerPorNumeroConta(this.clientesPf, numeroConta);
-			this.clientesPf[i] = c;
-		}
-		else if (c.getTipoConta().equals(TipoConta.PJ)) {
-			int i = Helpers.varrerPorNumeroConta(this.clientesPj, numeroConta);
-			this.clientesPj[i] = c;
-		}
-		
-	}*/
+    public static void depositar(Cliente cliente, float valor) {
+        String query = null;
+        if (valor > 0) {
+            cliente.setSaldo((cliente.getSaldo() + valor));
+            if (cliente.getTipoConta().equals(TipoConta.PJ)) {
+                query = "update clientepj set saldo = " + cliente.getSaldo() + " where id  = " + cliente.getId() + ";";
+            } else {
+                query = "update clientepf set saldo = " + cliente.getSaldo() + " where id  = " + cliente.getId() + ";";
+            }
+            Conexao.executarDML(query);
+            System.out.println("Deposito Efetuado com sucesso");
+        } else {
+            System.out.println("Valor de deposito invalido");
+        }
+
+    }
+
 
 }

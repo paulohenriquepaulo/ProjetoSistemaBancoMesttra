@@ -14,21 +14,6 @@ public class ClientePj extends Cliente {
 		super(numeroConta, agencia, telefone, saldo, limiteChequeEspecial, tipoConta, senha);
 	}
 
-	/*public ClientePj(String numeroConta, int agencia, int telefone, double saldo, double limiteChequeEspecial,
-			String cnpj, String[] nomeSocios, String razaoSocial, String nomeFantasia) {
-
-		super(numeroConta, agencia, telefone, saldo, limiteChequeEspecial);
-
-		this.cnpj = cnpj;
-		this.nomeSocios = nomeSocios;
-		this.razaoSocial = razaoSocial;
-		this.nomeFantasia = nomeFantasia;
-	}
-
-	public ClientePj(String numeroConta, int agencia, int telefone, double saldo, double limiteChequeEspecial) {
-		super(numeroConta, agencia, telefone, saldo, limiteChequeEspecial);
-	}*/
-
 
 	public String getCnpj() {
 		return cnpj;
